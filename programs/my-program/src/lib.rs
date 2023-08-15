@@ -9,6 +9,7 @@ pub mod my_program {
     pub fn initialize(ctx: Context<Initialize>, value: u64) -> Result<()> {
         let my_counter = &mut ctx.accounts.my_counter;
         my_counter.value = value;
+        my_counter.bump = *ctx.bumps.get("my_counter").unwrap();
 
         Ok(())
     }
@@ -28,12 +29,16 @@ pub mod my_program {
 
         Ok(())
     }
+
+    pub fn close(_ctx: Context<Close>) -> Result<()> {
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    // space: 8 (discriminator) + 8 (u64)
-    #[account(init, payer = user, space = 8 + 8)]
+    // space: 8 (discriminator) + MyCounter::MAX_SIZE
+    #[account(init_if_needed, payer = user, seeds = [b"my-counter", user.key().as_ref()], bump, space = 8 + MyCounter::MAX_SIZE)]
     pub my_counter: Account<'info, MyCounter>,
     #[account(mut)]
     pub user: Signer<'info>,
@@ -42,19 +47,30 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct AddEven<'info> {
-    #[account(mut)]
+    #[account(seeds = [b"my-counter", user.key().as_ref()], bump)]
     pub my_counter: Account<'info, MyCounter>,
+    pub user: Signer<'info>,
 }
 
 #[derive(Accounts)]
 pub struct MinusOdd<'info> {
-    #[account(mut)]
+    #[account(seeds = [b"my-counter", user.key().as_ref()], bump)]
     pub my_counter: Account<'info, MyCounter>,
+    pub user: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Close<'info> {
+    #[account(mut, seeds = [b"my-counter", user.key().as_ref()], bump, close = user)]
+    pub my_counter: Account<'info, MyCounter>,
+    #[account(mut)]
+    pub user: Signer<'info>,
 }
 
 #[account]
 pub struct MyCounter {
     pub value: u64,
+    pub bump: u8,
 }
 
 #[error_code]
@@ -63,4 +79,9 @@ pub enum ErrorCode {
     ValueIsNotEven,
     #[msg("value is not odd")]
     ValueIsNotOdd,
+}
+
+impl MyCounter {
+    // space: 8 (u64) + 1 (bump)
+    const MAX_SIZE: usize = 8 + 1;
 }
