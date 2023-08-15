@@ -10,6 +10,7 @@ pub mod my_program {
         let my_counter = &mut ctx.accounts.my_counter;
         my_counter.value = value;
         my_counter.bump = *ctx.bumps.get("my_counter").unwrap();
+        msg!("value: {}", my_counter.value);
 
         Ok(())
     }
@@ -18,6 +19,7 @@ pub mod my_program {
         require!(value % 2 == 0, ErrorCode::ValueIsNotEven);
         let my_counter = &mut ctx.accounts.my_counter;
         my_counter.value = my_counter.value.checked_add(value).unwrap();
+        msg!("value: {}", my_counter.value);
 
         Ok(())
     }
@@ -26,6 +28,7 @@ pub mod my_program {
         require!(value % 2 == 1, ErrorCode::ValueIsNotOdd);
         let my_counter = &mut ctx.accounts.my_counter;
         my_counter.value = my_counter.value.checked_sub(value).unwrap();
+        msg!("value: {}", my_counter.value);
 
         Ok(())
     }
@@ -47,14 +50,14 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct AddEven<'info> {
-    #[account(seeds = [b"my-counter", user.key().as_ref()], bump)]
+    #[account(mut, seeds = [b"my-counter", user.key().as_ref()], bump)]
     pub my_counter: Account<'info, MyCounter>,
     pub user: Signer<'info>,
 }
 
 #[derive(Accounts)]
 pub struct MinusOdd<'info> {
-    #[account(seeds = [b"my-counter", user.key().as_ref()], bump)]
+    #[account(mut, seeds = [b"my-counter", user.key().as_ref()], bump)]
     pub my_counter: Account<'info, MyCounter>,
     pub user: Signer<'info>,
 }
