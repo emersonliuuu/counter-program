@@ -9,7 +9,7 @@ pub mod my_program {
     pub fn initialize(ctx: Context<Initialize>, value: u64) -> Result<()> {
         let my_counter = &mut ctx.accounts.my_counter;
         my_counter.value = value;
-        my_counter.bump = *ctx.bumps.get("my_counter").unwrap();
+        my_counter.bump = ctx.bumps.my_counter;
         msg!("value: {}", my_counter.value);
 
         Ok(())
