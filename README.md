@@ -6,7 +6,7 @@ https://emersonliuuu.notion.site/Basic-Solana-Developing-Process-with-Anchor-Fra
 Run the following commands to start the project:
 
 ```bash
-git clone git@github.com:emersonliuuu/counter-program.git
+git clone https://github.com/emersonliuuu/counter-program.git
 
 cd counter-program
 git submodule update --init
